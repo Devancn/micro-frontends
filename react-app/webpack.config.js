@@ -16,7 +16,8 @@ const htmlWebpackPlugin = require('html-webpack-plugin');
     port: 30001,
     headers: {
       'Access-Control-Allow-Origin': '*'
-    }
+    },
+    historyApiFallback : true
   },
   module: {
     rules:  [
