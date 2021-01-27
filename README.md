@@ -30,6 +30,7 @@ qiankun 是一个生产可用的微前端框架，它基于 single-spa，具备 
   // 这里是我们子应用的script text
 }).bind(window.proxy)(window.proxy, window.proxy, window.proxy);`
 ```
+> 这样不管你在子应用全局环境下的this、window、self、globalThis都是指向这个代理的fakeWindow对象了
 #### 样式隔离
 社区上讨论的隔离方案有BEM、CSS Modules、 CSS-in-js
 - BEM 简单来说就是不同项目之间约定一个前缀后者命名规则，[对应介绍](https://segmentfault.com/a/1190000009953887)
@@ -37,14 +38,13 @@ qiankun 是一个生产可用的微前端框架，它基于 single-spa，具备 
 - CSS-in-js 简单来说就是CSS 和 jS 编码在一起， [对应介绍](https://zhuanlan.zhihu.com/p/103522819)
 
 但是`qiankun`做处理的时候是使用以下两种方式：
-- web components中的Shadow DOM，子应用的样式会动态插入到Host节点下，在案例实践的时候遇到一些问题,需要自行解决，[Shadow DOM介绍](http://www.ruanyifeng.com/blog/2019/08/web_components.html)
-- 动态创建样式表对应的Style节点，并挂载在子应用挂载节点下，因为应用unmount的时候子应用内的DOM树会被移除，这其实只是解决了子子应用之间的样式隔离问题，且是但应用模式下。今天分享的都是单应用模式，qiankun2.0现在支持多应用模式
+- 使用Shadow DOM是创建一个DOM节点作为Shadow host，并把子应用html text作为该host的内容，[Shadow DOM介绍](https://developer.mozilla.org/zh-CN/docs/Web/Web_Components/Using_shadow_DOM)
+- 动态创建样式表对应的Style节点，并挂载在子应用挂载节点下，因为应用unmount的时候子应用内的DOM树会被移除，这其实只是解决了子子应用之间的样式隔离问题，且是单应用模式下。今天分享的都是单应用模式，qiankun2.0现在支持多应用模式
 
 #### HTML Loader
-HTML Loader解决的是子应用如何选择的问题，也就是说它使用html作为子应用的入口，基座应用于子应用解耦，因为这样子应用可以单独运行、独立不熟。还有一种方式是通过js作为子应用入口，不过这种方式依赖基座应用提供挂载点，这样子应用的独立性就不高了。html loader大致工作流程如下：
+HTML Loader解决的是子应用如何选择的问题，也就是说它使用html作为子应用的入口，基座应用于子应用解耦，因为这样子应用可以单独运行、独立部署。还有一种方式是通过js作为子应用入口，不过这种方式依赖基座应用提供挂载点，这样子应用的独立性就不高了。html loader大致工作流程如下：
 1. fetch 请求入口html文件
-2. 利用正则匹配所有style、script、link等要加载资源的标签
-3. 匹配资源URL，如果是相对路径则根据entry转换成绝对路径并保存下来
-4. 拿到样式相关的链接加载并替换html中原来的位置
-
+2. 解析html文本获取所有的资源信息（css、script）
+3. fetch 请求所有css
+4. 判断是否使用
 > 对于已经下载的资源内部会做一个缓存
