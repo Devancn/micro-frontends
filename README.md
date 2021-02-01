@@ -48,3 +48,72 @@ HTML Loader解决的是子应用如何选择的问题，也就是说它使用htm
 3. fetch 请求所有css
 4. 判断是否使用
 > 对于已经下载的资源内部会做一个缓存
+
+
+
+### 基座应用配置
+
+```shell
+ yarn add qiankun 
+```
+
+- 在入口文件注册子应用
+
+```javascript
+
+registerMicroApps([
+  {
+    name: 'react',
+    entry: '//localhost:30001',
+    activeRule: '/react',
+    container: '#sub-app'
+  },
+  {
+    name: 'vue',
+    entry: '//localhost:30002',
+    activeRule: '/vue',
+    container: '#sub-app'
+  }
+])
+```
+
+
+
+### 微应用配置
+
+1. 在入口文件中导出`bootstrap` 、`mount`、` unmount`三个异步函数生命周期钩子以供主应用适当时机调用
+
+2. webpack 打包配置
+
+   ```javascript
+   {
+       devServer: {
+         headers: {
+           'Access-Control-Allow-Origin': '*'
+         }
+       },
+       output: {
+         library: 'vue',
+         libraryTarget: 'umd'
+       }
+     }
+   ```
+
+3. webpack 运行时 publicPath 配置
+
+   ```javascript
+   if(window.__POWERED_BY_QIANKUN__) {
+    __webpack_public_path__ = window.__INJECTED_PUBLIC_PATH_BY_QIANKUN__;
+   }
+   ```
+
+4. 独立运行微应用
+
+   ```javascript
+   if(!window.__POWERED_BY_QIANKUN__) {
+     render()
+   }
+   ```
+
+   
+
